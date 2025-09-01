@@ -24,7 +24,6 @@ async def unequify_command(client: Client, message: Message):
         return
 
     try:
-        # **CRITICAL FIX:** Changed 'iter_history' to the correct Pyrogram method 'get_chat_history'.
         async for msg in user.get_chat_history(message.chat.id):
             file_id = None
             
@@ -37,20 +36,20 @@ async def unequify_command(client: Client, message: Message):
             
             if file_id:
                 if file_id in seen_files:
-                    messages_to_delete.append(msg.message_id)
+                    # **CRITICAL FIX:** Changed 'msg.message_id' to the correct Pyrogram attribute 'msg.id'.
+                    messages_to_delete.append(msg.id)
                 else:
                     seen_files.add(file_id)
 
         if messages_to_delete:
             await client.send_message(message.chat.id, f"Found and deleting {len(messages_to_delete)} duplicate files.")
             
-            # Pyrogram can delete up to 100 messages at once
             for i in range(0, len(messages_to_delete), 100):
                 await client.delete_messages(
                     chat_id=message.chat.id,
                     message_ids=messages_to_delete[i:i + 100]
                 )
-                await asyncio.sleep(1) # Pause briefly to avoid rate limits
+                await asyncio.sleep(1)
                 
             await client.send_message(message.chat.id, "✅ **Cleanup Complete!**")
         else:
