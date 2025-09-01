@@ -24,8 +24,8 @@ async def unequify_command(client: Client, message: Message):
         return
 
     try:
-        # Use the 'user' client to iterate through the chat history
-        async for msg in user.iter_history(message.chat.id):
+        # **CRITICAL FIX:** Changed 'iter_history' to the correct Pyrogram method 'get_chat_history'.
+        async for msg in user.get_chat_history(message.chat.id):
             file_id = None
             
             if msg.document:
